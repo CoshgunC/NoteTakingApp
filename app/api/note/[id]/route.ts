@@ -1,25 +1,30 @@
 import { type NextRequest, NextResponse } from "next/server";
 import supabaseClient from "@/utils/db/supabaseClient";
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  const supabase = supabaseClient();
-  const { data, error } = await supabase
-    .from("notes")
-    .select("*")
-    .eq("id", params.id)
-    .single();
+export async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+  const params = await context.params
+  const supabase = supabaseClient()
 
-    if(error) {
-        return NextResponse.json({ error: error.message }, { status: 400 });
+  const { data, error } = await supabase.from("notes").select("*").eq("id", params.id).single()
+
+  if (error) {
+    console.log(error?.message + " ---- " + error?.details)
+
+    if (error.code === "PGRST116") {
+      return NextResponse.json({ error: "Note not found" }, { status: 404 })
     }
 
-    return NextResponse.json(data);
+    return NextResponse.json({ error: error.message }, { status: 400 })
+  }
+
+  return NextResponse.json(data)
 }
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  const params = await context.params;
   const supabase = supabaseClient();
   const { title, content } = await request.json();
 
@@ -30,15 +35,18 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     .select()
     .single();
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
-    }
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 400 });
+  }
 
-    return NextResponse.json(data);
-    
+  return NextResponse.json({ data }, { status: 200 });
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  const params = await context.params;
   const supabase = supabaseClient();
 
   const { data, error } = await supabase
@@ -48,10 +56,9 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     .select()
     .single();
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
-    }
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 400 });
+  }
 
-    return NextResponse.json(data);
-    
+  return NextResponse.json(data);
 }
