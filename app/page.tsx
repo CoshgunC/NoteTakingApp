@@ -10,7 +10,7 @@ export default function Home() {
       <header className="w-full h-fit">
         <div className="flex items-center gap-4">
           <span className="font-bold text-4xl">demo@gmail.com</span>
-          <button className="flex items-center gap-2 hover:bg-gray-800/80 p-2 rounded-md">Logout <LogOut /></button>
+          <button className="flex items-center gap-2 hover:bg-yellow-200/40 p-2 rounded-md">Logout <LogOut /></button>
         </div>
       </header>
       <section className="w-full h-fit flex items-center gap-8">
